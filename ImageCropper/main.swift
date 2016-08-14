@@ -12,7 +12,7 @@ import Cocoa
 
 let kFaceDetector: CIDetector = {
     let context = CIContext(options: nil)
-    let opts = [ CIDetectorAccuracy : CIDetectorAccuracyHigh ]
+    let opts = [ CIDetectorAccuracy : CIDetectorAccuracyLow ]
     return CIDetector(ofType: CIDetectorTypeFace, context: context, options: opts)
 }()
 
@@ -20,7 +20,6 @@ func findFaceRect(image: CIImage) -> CGRect? {
     let orientation = image.properties[kCGImagePropertyOrientation as String]
     let opts = orientation != nil ? [ CIDetectorImageOrientation : orientation! ] : [:]
     let features = kFaceDetector.featuresInImage(image, options: opts)
-
 
     return features.first?.bounds
 }
@@ -39,6 +38,10 @@ func openTmpFolder() {
     NSWorkspace.sharedWorkspace().openFile(kTmpFolder)
 }
 
+func err(err: String, atUrl url: String) {
+    print("err: \(err)  --- \(url)")
+}
+
 func user(inUrl url: String) -> String {
     return url.stringByReplacingOccurrencesOfString("https://zfinger.datasektionen.se/user/", withString: "")
               .stringByReplacingOccurrencesOfString("/image/640", withString: "")
@@ -46,20 +49,34 @@ func user(inUrl url: String) -> String {
 
 func write(image image: CIImage, toFileWithName name: String) {
     let rep = NSBitmapImageRep(CIImage: image)
-    let data = rep.representationUsingType(.NSJPEGFileType, properties: [:])
-    let path = kTmpFolder + name
-    data?.writeToFile(path, atomically: true)
-}
+    guard let data = rep.representationUsingType(.NSJPEGFileType, properties: [:]) else {
+        err("JPEG data", atUrl: name)
+        return
+    }
 
+    let path = kTmpFolder + name
+    data.writeToFile(path, atomically: true)
+}
 
 // *** TOTAL PROGRAM ****
 
 func cropImages(atUrls urlStrings: [String]) {
 
     for s in urlStrings {
-        guard let url = NSURL(string: s) else { continue }
-        guard var image = CIImage(contentsOfURL: url) else { continue }
-        guard var rect = findFaceRect(image) else { continue }
+        print("starting: \(s)")
+
+        guard let url = NSURL(string: s) else {
+            err("NSURL", atUrl: s)
+            continue
+        }
+        guard var image = CIImage(contentsOfURL: url) else {
+            err("CIImage", atUrl: s)
+            continue
+        }
+        guard var rect = findFaceRect(image) else {
+            err("CGRect", atUrl: s)
+            continue
+        }
 
         rect = rect.insetBy(dx: -60, dy: -60).offsetBy(dx: 0, dy: 10)
         image = image.imageByCroppingToRect(rect)
