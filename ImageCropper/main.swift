@@ -1,3 +1,5 @@
+#!/usr/bin/env xcrun --sdk macosx swift -target x86_64-macosx10.11
+
 //
 //  Copyright © 2016 Bystam. All rights reserved.
 //
@@ -38,7 +40,10 @@ func openTmpFolder() {
     NSWorkspace.sharedWorkspace().openFile(kTmpFolder)
 }
 
+var errUrls = [String]()
+
 func err(err: String, atUrl url: String) {
+    errUrls.append(url)
     print("err: \(err)  --- \(url)")
 }
 
@@ -93,3 +98,8 @@ while let url = readLine() {
 
 openTmpFolder()
 cropImages(atUrls: urls)
+
+if !errUrls.isEmpty {
+    print("\n---- Urls which encountered some error: ----")
+    print(errUrls.joinWithSeparator("\n"))
+}

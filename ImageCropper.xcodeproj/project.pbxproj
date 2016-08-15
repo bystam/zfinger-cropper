@@ -25,7 +25,6 @@
 /* Begin PBXFileReference section */
 		DB59408A1D60FA380074B5A1 /* ImageCropper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ImageCropper; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB59408D1D60FA380074B5A1 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		DB5940941D6104BA0074B5A1 /* images.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = images.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +57,6 @@
 		DB59408C1D60FA380074B5A1 /* ImageCropper */ = {
 			isa = PBXGroup;
 			children = (
-				DB5940941D6104BA0074B5A1 /* images.txt */,
 				DB59408D1D60FA380074B5A1 /* main.swift */,
 			);
 			path = ImageCropper;
@@ -243,6 +241,7 @@
 				DB5940931D60FA380074B5A1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
