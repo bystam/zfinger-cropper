@@ -65,39 +65,42 @@ func write(image image: CIImage, toFileWithName name: String) {
 
 // *** TOTAL PROGRAM ****
 
-func cropImages(atUrls urlStrings: [String]) {
+func cropImage(atUrlString s: String) {
 
-    for s in urlStrings {
-        print("starting: \(s)")
+    print("starting: \(s)")
 
-        guard let url = NSURL(string: s) else {
-            err("NSURL", atUrl: s)
-            continue
-        }
-        guard var image = CIImage(contentsOfURL: url) else {
-            err("CIImage", atUrl: s)
-            continue
-        }
-        guard var rect = findFaceRect(image) else {
-            err("CGRect", atUrl: s)
-            continue
-        }
-
-        rect = rect.insetBy(dx: -60, dy: -60).offsetBy(dx: 0, dy: 10)
-        image = image.imageByCroppingToRect(rect)
-
-        let fileName = "\(user(inUrl: s)).jpg"
-        write(image: image, toFileWithName: fileName)
+    guard let url = NSURL(string: s) else {
+        err("NSURL", atUrl: s)
+        return
     }
-}
+    guard var image = CIImage(contentsOfURL: url) else {
+        err("CIImage", atUrl: s)
+        return
+    }
+    guard var rect = findFaceRect(image) else {
+        err("CGRect", atUrl: s)
+        return
+    }
 
-var urls = [String]()
-while let url = readLine() {
-    urls.append(url)
+    rect = rect.insetBy(dx: -60, dy: -60).offsetBy(dx: 0, dy: 10)
+    image = image.imageByCroppingToRect(rect)
+
+    let fileName = "\(user(inUrl: s)).jpg"
+    write(image: image, toFileWithName: fileName)
 }
 
 openTmpFolder()
-cropImages(atUrls: urls)
+
+let queue = NSOperationQueue()
+queue.maxConcurrentOperationCount = 4
+while let url = readLine() {
+    let op = NSBlockOperation(block: {
+        cropImage(atUrlString: url)
+    })
+    queue.addOperation(op)
+}
+
+queue.waitUntilAllOperationsAreFinished()
 
 if !errUrls.isEmpty {
     print("\n---- Urls which encountered some error: ----")
