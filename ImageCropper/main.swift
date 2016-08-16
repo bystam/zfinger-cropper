@@ -63,6 +63,7 @@ func write(image image: CIImage, toFileWithName name: String) {
     data.writeToFile(path, atomically: true)
 }
 
+
 // *** TOTAL PROGRAM ****
 
 func cropImage(atUrlString s: String) {
@@ -73,7 +74,11 @@ func cropImage(atUrlString s: String) {
         err("NSURL", atUrl: s)
         return
     }
-    guard var image = CIImage(contentsOfURL: url) else {
+    guard let data = NSData(contentsOfURL: url) else {
+        err("HTTP data", atUrl: s)
+        return
+    }
+    guard var image = CIImage(data: data) else {
         err("CIImage", atUrl: s)
         return
     }
