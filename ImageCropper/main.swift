@@ -40,11 +40,13 @@ func openTmpFolder() {
     NSWorkspace.sharedWorkspace().openFile(kTmpFolder)
 }
 
-var errUrls = [String]()
+var errors = [String : [String]]()
 
-func err(err: String, atUrl url: String) {
-    errUrls.append(url)
-    print("err: \(err)  --- \(url)")
+func err(cause: String, atUrl url: String) {
+    let existing = errors[cause] ?? []
+    errors[cause] = existing + [url]
+
+    print("err: \(cause)  ---  \(url)")
 }
 
 func user(inUrl url: String) -> String {
@@ -55,7 +57,7 @@ func user(inUrl url: String) -> String {
 func write(image image: CIImage, toFileWithName name: String) {
     let rep = NSBitmapImageRep(CIImage: image)
     guard let data = rep.representationUsingType(.NSJPEGFileType, properties: [:]) else {
-        err("JPEG data", atUrl: name)
+        err("JPEG data conversion fail", atUrl: name)
         return
     }
 
@@ -71,19 +73,19 @@ func cropImage(atUrlString s: String) {
     print("starting: \(s)")
 
     guard let url = NSURL(string: s) else {
-        err("NSURL", atUrl: s)
+        err("Invalid URL", atUrl: s)
         return
     }
     guard let data = NSData(contentsOfURL: url) else {
-        err("HTTP data", atUrl: s)
+        err("Image data load fail", atUrl: s)
         return
     }
     guard var image = CIImage(data: data) else {
-        err("CIImage", atUrl: s)
+        err("Image creation fail", atUrl: s)
         return
     }
     guard var rect = findFaceRect(image) else {
-        err("CGRect", atUrl: s)
+        err("Face find fail", atUrl: s)
         return
     }
 
@@ -107,7 +109,11 @@ while let url = readLine() {
 
 queue.waitUntilAllOperationsAreFinished()
 
-if !errUrls.isEmpty {
-    print("\n---- Urls which encountered some error: ----")
-    print(errUrls.joinWithSeparator("\n"))
+print("\n---- Done! ----")
+if !errors.isEmpty {
+    print("\n---- Encountered errors of types: ----")
+    for (cause, urls) in errors {
+        print("-- \(cause) --")
+        print(urls.joinWithSeparator("\n"))
+    }
 }
